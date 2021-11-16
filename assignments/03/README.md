@@ -16,7 +16,11 @@ And we will compare other models with this 15.1 BLEU score.
 
 ## Strategy
 
-We choose to tune the hyperparameters (learning rate and batch size) and implement the lexical model, because we want to start with a simple setting and then do something more interesting.
+We choose to 
+
+1.tune the hyperparameters (more specifically learning rate and batch size), because we want to start with a simple setting and then do something more interesting.
+
+2.implement the lexical model, because there are hints where the code should be changed and can be easy to put hands on, and according to the paper lexical model can be very benificial.
 
 ## Data
 
@@ -30,7 +34,7 @@ For strategy two: implementing the lexical model, we made three changes in the `
 
 1. initialize the one-hidden-layer FFNN and output linear layer
 
-2. use the one-layer FFNN with skip connection to compute the h<sup>l</sup><sub>t</sub>
+2. use the one-layer FFNN with skip connection to compute the h<sup>l</sup><sub>t</sub> in the paper [1]
 
 3. use the output linear layer to compute W<sup>l</sup>h<sup>l</sup><sub>t</sub> + b<sup>l</sup> and add it to the original decoder output.
 
@@ -80,3 +84,7 @@ And our best model get a BLEU score of 21.7, which outperforms the baseline (15.
 
 What we learn from these experiments is that lexical model can help capture the meaning of sentences, and tuning hyperparameters can improve our model very much.
 If we had time, next time we would like to also try the BPE method.
+
+## Reference
+[1] Toan Nguyen and David Chiang. Improving lexical choice in neural machine translation. In
+Proceedings of the 2018 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1 (Long Papers), pages 334–343, New Orleans, Louisiana, June 2018. Association for Computational Linguistics.
