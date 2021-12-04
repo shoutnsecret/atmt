@@ -224,8 +224,9 @@ class LSTMDecoder(Seq2SeqDecoder):
         self.use_lexical_model = use_lexical_model
         if self.use_lexical_model:
             # __LEXICAL: Add parts of decoder architecture corresponding to the LEXICAL MODEL here
-            pass
             # TODO: --------------------------------------------------------------------- /CUT
+            self.FFNN = nn.Linear(embed_dim, embed_dim, bias=False)
+            self.out_layer = nn.Linear(embed_dim, len(dictionary))
 
     def forward(self, tgt_inputs, encoder_out, incremental_state=None):
         """ Performs the forward pass through the instantiated model. """
@@ -292,7 +293,9 @@ class LSTMDecoder(Seq2SeqDecoder):
                 if self.use_lexical_model:
                     # __LEXICAL: Compute and collect LEXICAL MODEL context vectors here
                     # TODO: --------------------------------------------------------------------- CUT
-                    pass
+                    step_attn_weights = step_attn_weights.permute(1, 0).unsqueeze(dim=2)
+                    weighted_avg_emdeddings = torch.tanh((step_attn_weights * src_embeddings).sum(dim=0))
+                    lexical_contexts.append(torch.tanh(self.FFNN(weighted_avg_emdeddings)) + weighted_avg_emdeddings)
                     # TODO: --------------------------------------------------------------------- /CUT
 
             input_feed = F.dropout(input_feed, p=self.dropout_out, training=self.training)
@@ -313,8 +316,10 @@ class LSTMDecoder(Seq2SeqDecoder):
 
         if self.use_lexical_model:
             # __LEXICAL: Incorporate the LEXICAL MODEL into the prediction of target tokens here
-            pass
             # TODO: --------------------------------------------------------------------- /CUT
+            decoder_output += self.out_layer(
+                torch.cat(lexical_contexts, dim=0).view(tgt_time_steps, batch_size,self.embed_dim).transpose(0, 1)
+            )
 
 
         return decoder_output, attn_weights
@@ -337,4 +342,4 @@ def base_architecture(args):
     args.decoder_dropout_in = getattr(args, 'decoder_dropout_in', 0.25)
     args.decoder_dropout_out = getattr(args, 'decoder_dropout_out', 0.25)
     args.decoder_use_attention = getattr(args, 'decoder_use_attention', 'True')
-    args.decoder_use_lexical_model = getattr(args, 'decoder_use_lexical_model', 'False')
+    args.decoder_use_lexical_model = getattr(args, 'decoder_use_lexical_model', 'True')
