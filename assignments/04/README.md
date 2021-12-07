@@ -86,11 +86,13 @@ In `translate_beam.py` we add two parameters: N_best and gamma. At the first tim
 
 **Observing the influence of gamma:**
 
-We tried different gammas from 0 to 10, and we choose gamma=0, 5, and 10 to compare their translation differences.
+We tried 11 different gammas from 0 to 10, and the results are store in assignment/04/diverse_beam_search.
 
-<img src="diverse_beam_search.png" width="70%"/>
+We choose gamma=0, 5, and 10 to compare their translation differences.
 
-The left translation uses gamma=0, middle uses gamma=5, right uses gamma=10. We can see the red arrow which shows that the 3 hypotheses get apparently more diverse when gamma increase from 0 to 5. The same effect can be observed in the green arrow. However, we can see from the green arrow that the meaning of the 3 hypothese are totally different/changed. So a too large gamma could possibly hurt the precision of translation.
+<img src="diverse_beam_search.png" />
+
+The left translation uses gamma=0, middle uses gamma=5, right uses gamma=10. We can see the red arrow which shows that the 3 hypotheses get apparently more diverse when gamma increases from 0 to 5. The same effect can be observed in the green arrow. However, we can see from the green arrow that the meaning of the 3 hypothese are totally different/changed. So a too large gamma could possibly hurt the precision of translation.
 
 ## Reference
 [1]Yonghui Wu, Mike Schuster, Zhifeng Chen, Quoc V. Le, Mohammad Norouzi, Wolfgang
@@ -100,3 +102,6 @@ Hideto Kazawa, Keith Stevens, George Kurian, Nishant Patil, Wei Wang, Cliff Youn
 Smith, Jason Riesa, Alex Rudnick, Oriol Vinyals, Gregory S. Corrado, Macduff Hughes, and 
 Jeffrey Dean. Google’s neural machine translation system: Bridging the gap between human
 and machine translation. CoRR, abs/1609.08144, 2016.
+
+[2]Jiwei Li and Daniel Jurafsky. Mutual information and diverse decoding improve neural
+machine translation. ArXiv, abs/1601.00372, 2016.
