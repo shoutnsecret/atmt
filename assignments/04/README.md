@@ -27,7 +27,7 @@ Let r be the length of the reference in words, and t length of the translation. 
 
 **1.2. What is the relationship between beam size and decoding time?**
 
-Although we didn't record the time explicitly, we had an obvious feeling that when beam size is small, the translation happens in a blink of en eye, while it takes  several seconds when beam size gets larger and larger. So larger beam size increases the decoding time, which is reasonable as there are more hypotheses to be tracked and explored.
+Although we didn't record the time explicitly, we had an obvious feeling that when beam size is 1, the translation happens in a blink of en eye, while it takes  several seconds when beam size gets larger and larger, and takes a half minute when beam size is 10. So larger beam size increases the decoding time, which is reasonable as there are more hypotheses to be tracked and explored.
 
 **1.3. Why translation length decreases as the beam size increases?**
 
@@ -65,3 +65,38 @@ The prune function is defined as a method of class BeamSearch in beam.py. First 
 This for loop converts the padded token sequences back to valid token sequences. It finds the index where the token is an EOS and add the sequence up to this index to a temp list. If there is no EOS in a sequence, it adds the complete 100 tokens in this sequence to the temp list. And then the temp list is converted to real words using the target dictionary.
 
 ## 3. Adding Length Normalization
+
+We choose 10 values of alpha between 0 and 1. Again, the brevity penalty of all expetiments are exactly 1, since length of translation is always larger than length of refernce (3892). The results are as follows:
+
+<img src="length_normalization.png" width="70%"/>
+
+The optimal alpha is 0, so we don't need to run experiments to search best hyperparameters combinations for alpha and beam size. The best combination is just the figure in Section 1: beam size=10, alpha=0, BLEU=25.6.
+
+We can see that as the alpha increases, the BLEU score keeps decreasing and length of translation keeps increasing. It is no wonder to see this, because in our case the decoding is never punished by brevity penalty. When alpha is 0, everything is fine. When alpha increases or even becomes 1, we have a length normalization effect such that longer sentences are prefered, so length of translation increases as alpha increases. However, this drops the BLEU score since there is no point in preferring a longer translation which tends to have a smaller overall possibility (we have explained this in 1.3), if we are not punished by brevity penalty.
+
+Conclusion from our experiment: length normalization does not take effect when brevity penalty is already 1. However, from the paper [1] it is said length normalization is very useful. Our guess is that it is useful when translations are too short and are being punished by brevity penalty, and this is where length normalization plays its role: it makes the decoding prefer longer sentences, thus being less punished by brevity penalty.
+
+## 4. Investigating the Diversity of Beam Search
+
+**Code Changes:**
+
+In `beam.py`, we pass a N parameter to the get_best method to a list of hypotheses. And we modify the eval method of BeamSearchNode such that it returns log probability minus the sibling rank of the current word multiplied with gamma, as is introduced in [2]. 
+
+In `translate_beam.py` we add two parameters: N_best and gamma. At the first time step we pass gamma=0, because all words here have the same parent (EOS), so it is better not to punish the first word for a better diversity. For futher words,  we pass the rank of the word in the current position and the gamma when evaluating the log score. And we modify the best_sents and the writing part to write the N_best hypotheses into a file.
+
+**Observing the influence of gamma:**
+
+We tried different gammas from 0 to 10, and we choose gamma=0, 5, and 10 to compare their translation differences.
+
+<img src="diverse_beam_search.png" width="70%"/>
+
+The left translation uses gamma=0, middle uses gamma=5, right uses gamma=10. We can see the red arrow which shows that the 3 hypotheses get apparently more diverse when gamma increase from 0 to 5. The same effect can be observed in the green arrow. However, we can see from the green arrow that the meaning of the 3 hypothese are totally different/changed. So a too large gamma could possibly hurt the precision of translation.
+
+## Reference
+[1]Yonghui Wu, Mike Schuster, Zhifeng Chen, Quoc V. Le, Mohammad Norouzi, Wolfgang
+Macherey, Maxim Krikun, Yuan Cao, Qin Gao, Klaus Macherey, Jeff Klingner, Apurva Shah,
+Melvin Johnson, Xiaobing Liu, Lukasz Kaiser, Stephan Gouws, Yoshikiyo Kato, Taku Kudo,
+Hideto Kazawa, Keith Stevens, George Kurian, Nishant Patil, Wei Wang, Cliff Young, Jason
+Smith, Jason Riesa, Alex Rudnick, Oriol Vinyals, Gregory S. Corrado, Macduff Hughes, and 
+Jeffrey Dean. Google’s neural machine translation system: Bridging the gap between human
+and machine translation. CoRR, abs/1609.08144, 2016.
