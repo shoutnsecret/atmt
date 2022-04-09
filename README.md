@@ -33,7 +33,10 @@ pip install virtualenv
 virtualenv --python=python3 atmt36
 
 # launch the newly created environment
-atmt36/bin/activate
+source atmt36/bin/activate
+
+# exit environment
+deactivate
 
 # intall required packages
 pip install torch==1.6.0 numpy tqdm sacrebleu
