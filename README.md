@@ -29,17 +29,18 @@ pip install torch==1.6.0 numpy tqdm sacrebleu
 # install virtualenv
 pip install virtualenv
 
-# create a virtual environment named "atmt36"
-virtualenv --python=python3 atmt36
+# create a virtual environment named "my_env"
+virtualenv --python=python3 my_env
 
 # launch the newly created environment
-source atmt36/bin/activate
+source my_env/bin/activate
+
+# install packages (must de done within the environment activated in last step)
+pip install pandas
 
 # exit environment
 deactivate
 
-# intall required packages
-pip install torch==1.6.0 numpy tqdm sacrebleu
 ```
 
 <!-- # Data Preprocessing
